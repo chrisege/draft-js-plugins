@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import { genKey } from 'draft-js';
-import Entry from './Entry';
+import EmojiPicker from 'emojione-picker';
+// import Entry from './Entry';
 import addEmoji from '../modifiers/addEmoji';
 import getSearchText from '../utils/getSearchText';
 import decodeOffsetKey from '../utils/decodeOffsetKey';
@@ -190,11 +191,15 @@ export default class EmojiSuggestions extends Component {
     this.props.store.setEditorState(this.props.store.getEditorState());
   };
 
-  // Get the first 6 emojis that match
-  getEmojisForFilter = () => {
+  getEmojiSearch = () => {
     const selection = this.props.store.getEditorState().getSelection();
     const { word } = getSearchText(this.props.store.getEditorState(), selection);
-    const emojiValue = word.substring(1, word.length).toLowerCase();
+    return word.substring(1, word.length).toLowerCase();
+  }
+
+  // Get the first 6 emojis that match
+  getEmojisForFilter = () => {
+    const emojiValue = this.getEmojiSearch();
     const filteredValues = this.props.shortNames.filter((emojiShortName) => (
       !emojiValue || emojiShortName.indexOf(emojiValue) > -1
     ));
@@ -257,7 +262,8 @@ export default class EmojiSuggestions extends Component {
       return null;
     }
 
-    this.filteredEmojis = this.getEmojisForFilter();
+    this.emojiSearch = this.getEmojiSearch();
+
     const {
       theme = {},
       cacheBustParam,
@@ -280,23 +286,7 @@ export default class EmojiSuggestions extends Component {
           this.popover = element;
         }}
       >
-        {
-          this.filteredEmojis.map((emoji, index) => (
-            <Entry
-              key={emoji}
-              onEmojiSelect={this.onEmojiSelect}
-              onEmojiFocus={this.onEmojiFocus}
-              isFocused={this.state.focusedOptionIndex === index}
-              emoji={emoji}
-              index={index}
-              id={`emoji-option-${this.key}-${index}`}
-              theme={theme}
-              imagePath={imagePath}
-              imageType={imageType}
-              cacheBustParam={cacheBustParam}
-            />
-          )).toJS()
-        }
+        <EmojiPicker search={this.emojisearch} />
       </div>
     );
   }
